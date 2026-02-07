@@ -2,17 +2,17 @@
 # Build stage
 # ========================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# Copy project file and restore dependencies
+# Copy the project file and restore dependencies
 COPY Application.csproj ./
 RUN dotnet restore
 
-# Copy the rest of the project files
+# Copy all other files
 COPY . ./
 
-# Publish the application
-RUN dotnet publish -c Release -o out
+# Publish the project to /app/out
+RUN dotnet publish Application.csproj -c Release -o /app/out
 
 # ========================
 # Runtime stage
@@ -20,12 +20,13 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
-# Copy the published output from the build stage
+# Copy published output from build stage
 COPY --from=build /app/out ./
 
-# Expose port 8080 (Render default)
+# Expose Render default port
 EXPOSE 8080
 
 # Start the application
 ENTRYPOINT ["dotnet", "Application.dll"]
+
 
